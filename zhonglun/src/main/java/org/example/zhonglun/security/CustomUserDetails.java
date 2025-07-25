@@ -20,12 +20,29 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        String role = switch (user.getUserType()) {
-            case 1 -> "ROLE_CUSTOMER";
-            case 2 -> "ROLE_MERCHANT";
-            case 3 -> "ROLE_PLATFORM";
-            default -> "ROLE_GUEST";
-        };
+        String role;
+        Integer userType = this.user.getUserType();
+
+        if (userType == null) {
+            // 默认或无类型时，给予最基础的角色
+            role = "ROLE_USER";
+        } else {
+            switch (userType) {
+                case 1:
+                    role = "ROLE_CUSTOMER";
+                    break;
+                case 2:
+                    role = "ROLE_MERCHANT";
+                    break;
+                case 3:
+                    role = "ROLE_ADMIN"; // 假设平台是管理员
+                    break;
+                default:
+                    role = "ROLE_USER";
+                    break;
+            }
+        }
+        // Spring Security 需要 "ROLE_" 前缀来进行角色判断
         return Collections.singletonList(new SimpleGrantedAuthority(role));
     }
 

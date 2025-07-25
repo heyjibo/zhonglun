@@ -1,8 +1,18 @@
 package org.example.zhonglun.service;
 
-public interface ProductService {
-    // ... 原有方法
+import org.example.zhonglun.dto.request.ProductRequest;
+import org.example.zhonglun.entity.Product;
 
+import java.util.List;
+
+public interface ProductService {
+    Product createProduct(ProductRequest request, Long userId);
+    Product updateProduct(Long productId, ProductRequest request, Long userId);
+    void deleteProduct(Long productId, Long userId);
+    Product getProductByIdAndMerchantId(Long productId, Long userId);
+    List<Product> getProductsByMerchantId(Long userId);
+    Product publishProduct(Long productId, Long userId);
+    Product delistProduct(Long productId, Long userId);
     /**
      * 在应用启动或商品更新时，将商品库存加载到 Redis
      * @param productId 商品ID
