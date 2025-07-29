@@ -5,16 +5,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.zhonglun.dto.request.CreateAddressRequest;
 import org.example.zhonglun.dto.response.CustomerProfileResponse;
 import org.example.zhonglun.entity.Address;
+import org.example.zhonglun.entity.Order;
 import org.example.zhonglun.entity.User;
 import org.example.zhonglun.exception.ResourceNotFoundException;
+import org.example.zhonglun.repository.OrderRepository;
 import org.example.zhonglun.repository.UserRepository;
 import org.example.zhonglun.security.CustomUserDetails;
 import org.example.zhonglun.service.AddressService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -25,11 +30,13 @@ public class CustomerController {
 
     private final AddressService addressService;
     private final UserRepository userRepository;
+    private final OrderRepository orderRepository;
 
     @Autowired
-    public CustomerController(AddressService addressService, UserRepository userRepository) {
+    public CustomerController(AddressService addressService, UserRepository userRepository, OrderRepository orderRepository) {
         this.addressService = addressService;
         this.userRepository = userRepository;
+        this.orderRepository = orderRepository;
     }
 
     /**
@@ -90,5 +97,30 @@ public class CustomerController {
                                               @AuthenticationPrincipal CustomUserDetails userDetails) {
         addressService.deleteAddress(addressId, userDetails.getId());
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/orders/{orderId}/logistics")
+    public ResponseEntity<String> getOrderLogistics(@PathVariable Long orderId /*, @AuthenticationPrincipal YourUserPrincipal currentUser */) {
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Order not found"));
+
+        // 安全性检查: 确保是订单所有者在查询
+        // if (!order.getUserId().equals(currentUser.getId())) {
+        //     throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access Denied");
+        // }
+
+        String logisticsTrace = order.getLogisticsTrace();
+
+        if (logisticsTrace == null || logisticsTrace.isEmpty()) {
+            String noTraceInfo = "{\"Success\":false, \"Reason\":\"暂无物流信息，包裹可能正在等待揽收。\", \"Traces\":[]}";
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8")
+                    .body(noTraceInfo);
+        }
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8")
+                .body(logisticsTrace);
     }
 }

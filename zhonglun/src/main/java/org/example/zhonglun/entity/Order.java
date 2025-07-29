@@ -24,6 +24,15 @@ public class Order {
     private Timestamp receiveTime;
     private Timestamp updateTime;
 
+    @Column(length = 50)
+    private String courierCompanyCode; // 快递公司编码 (例如: "SF", "YTO")
+
+    @Column(length = 100, unique = true)
+    private String trackingNumber;     // 快递单号
+
+    @Column(columnDefinition = "TEXT")
+    private String logisticsTrace;
+
 
 
 }

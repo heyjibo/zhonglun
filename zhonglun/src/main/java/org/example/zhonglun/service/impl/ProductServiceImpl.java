@@ -173,7 +173,6 @@ public class ProductServiceImpl implements ProductService {
                 });
     }
 
-
     private Product getProductAndCheckOwnership(Long productId, Long merchantId) {
         // 1. 先根据ID查找商品是否存在
         Product product = productRepository.findById(productId)

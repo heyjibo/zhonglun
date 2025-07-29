@@ -1,5 +1,6 @@
 package org.example.zhonglun.exception;
 
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * 当尝试访问一个不存在的实体时抛出。
  * Spring MVC会自动将其映射为 HTTP 404 Not Found 状态码。
  */
+@Getter
 @ResponseStatus(HttpStatus.NOT_FOUND)
 public class ResourceNotFoundException extends RuntimeException {
 
@@ -29,15 +31,4 @@ public class ResourceNotFoundException extends RuntimeException {
         this.fieldValue = null;
     }
 
-    public String getResourceName() {
-        return resourceName;
-    }
-
-    public String getFieldName() {
-        return fieldName;
-    }
-
-    public Object getFieldValue() {
-        return fieldValue;
-    }
 }
